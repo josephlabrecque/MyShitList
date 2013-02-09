@@ -1,0 +1,24 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+
+
+
+global
+{
+	chrome-color: #E0B290;
+	content-background-color: #EFECE8;
+	focus-color: #FFA656;
+	roll-over-color: #EFE1CE;
+	selection-color: #B2B2B2;
+	color: #673203;
+	font-family: "_sans";
+}
+
+@font-face
+{
+	fontFamily: ShitFontFace;
+	src: url("assets/NothingYouCouldSay.ttf");
+	embedAsCFF: true;
+}
+
+

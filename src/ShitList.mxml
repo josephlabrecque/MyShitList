@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MobileApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					 xmlns:s="library://ns.adobe.com/flex/spark"
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 applicationComplete="init()" backgroundColor="#F2E9DD"
+					 firstView="views.ShitListHome" splashScreenImage="@Embed('assets/splash.png')"
+					 splashScreenMinimumDisplayTime="2000" splashScreenScaleMode="none"
+					 title="My Shit-List!">
+	
+	<fx:Style source="ShitList.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.events.UncaughtErrorEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.utils.ObjectUtil;
+			
+			import nz.co.codec.flexorm.EntityManager;
+			
+			import vo.ListEntry;
+			
+			[Bindable] public var listArrayCollection:ArrayCollection;
+			protected var entityManager:EntityManager=EntityManager.getInstance();
+			
+			protected function init():void {
+				var databaseFile:File = File.applicationStorageDirectory.resolvePath("shitlist.db");
+				var connection:SQLConnection = new SQLConnection();
+				connection.open(databaseFile);
+				entityManager.sqlConnection = connection;
+				loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, errorHandler);
+				
+				loadShitList();
+			}
+			
+			protected function loadShitList():void {
+				listArrayCollection = entityManager.findAll(ListEntry);
+				listArrayCollection.source.sortOn("EntryOrder");
+				listArrayCollection.refresh();
+			}
+			
+			
+			
+			
+			
+			public function shiftEntry(index:int):void {
+				listArrayCollection.addItemAt(listArrayCollection.removeItemAt(index), 0);
+				reorderList();
+			}
+			
+			public function reorderList():void {
+				for(var i:int=0; i<listArrayCollection.length; i++){
+					var listEntry:ListEntry = listArrayCollection.getItemAt(i) as ListEntry;
+					listEntry.EntryOrder = i;
+					entityManager.save(listEntry);
+				}
+				loadShitList();
+			}
+			
+			
+			
+			public function saveEntry(e:String):void {
+				var listEntry:ListEntry = new ListEntry();
+				listEntry.EntryName = e;
+				listEntry.EntryOrder = listArrayCollection.length;
+				entityManager.save(listEntry);
+				loadShitList();
+			}
+			
+			public function deleteEntry(index:int):void {
+				entityManager.remove(listArrayCollection.getItemAt(index));
+				loadShitList();
+			}
+			
+			private function errorHandler(e:UncaughtErrorEvent):void {
+				e.preventDefault();
+			}
+			
+			private function closeApp(e:MouseEvent):void {
+				NativeApplication.nativeApplication.exit();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:actionContent>
+		<s:Image click="closeApp(event)" source="assets/close.png"/>
+	</s:actionContent>
+	
+	<s:titleContent>
+		<s:Image source="assets/title.png"/>
+	</s:titleContent>
+	
+</s:MobileApplication>

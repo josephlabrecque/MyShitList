@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		currentState="ViewList" title="My Shit-List!"
+		textAlign.DeleteEntry="center" creationComplete="startTheShit()">
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"
+						  gap.DeleteEntry="20" horizontalAlign.DeleteEntry="center"
+						  paddingBottom.DeleteEntry="20" paddingLeft.DeleteEntry="40"
+						  paddingRight.DeleteEntry="40" paddingTop.DeleteEntry="20"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.events.IndexChangeEvent;
+			
+			private var shitIndex:int;
+			
+			protected function startTheShit():void {
+				myShitList.addEventListener("MOVE_UP", onMoveUp);
+				myShitList.addEventListener("DELETE", entrySelected);
+			}
+			
+			protected function onMoveUp(e:*):void {
+				parentApplication.shiftEntry(e.target.itemIndex);
+				myShitList.selectedIndex = -1;
+			}
+			
+			protected function addToShitList(e:MouseEvent):void {
+				parentApplication.saveEntry(entry.text);
+				currentState = "ViewList";
+			}
+			
+			protected function entrySelected(e:*):void {
+				shitIndex = e.target.itemIndex;
+				currentState = "DeleteEntry";
+				deleteName.text = myShitList.dataProvider.getItemAt(shitIndex).EntryName;
+			}
+			
+			protected function removeFromShitList():void {
+				currentState = "ViewList";
+				parentApplication.deleteEntry(shitIndex);
+				myShitList.selectedIndex = -1;
+			}
+			
+			protected function cancelDeletion(e:MouseEvent):void {
+				currentState = "ViewList";
+				myShitList.selectedIndex = -1;
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<s:states>
+		<s:State name="ViewList"/>
+		<s:State name="AddEntry" enterState="entry.text='';"/>
+		<s:State name="DeleteEntry"/>
+	</s:states>
+	
+	
+	
+	<s:List id="myShitList" includeIn="ViewList" width="100%" height="100%" 
+			borderVisible="false" change="{myShitList.selectedIndex = -1;}"
+			contentBackgroundAlpha="0" dataProvider="{parentApplication.listArrayCollection}"
+			itemRenderer="ShitRenderer" selectionColor="#F4F0E9">
+	</s:List>
+	
+	<s:Button includeIn="ViewList" width="100%" label="Add To My Shit-List!" click="currentState='AddEntry'" icon="@Embed('assets/icon_48.png')"/>
+	
+	
+	<s:Group includeIn="AddEntry" width="100%" height="100%" textAlign="center">
+		<s:layout>
+			<s:VerticalLayout gap="20" horizontalAlign="center" paddingLeft="20" paddingRight="20"/>
+		</s:layout>
+		<mx:Spacer width="100%" height="50"/>
+		<s:Label width="100%" text="Who or what is it that deserves to be on your Shit-List now?"/>
+		<s:TextInput id="entry" width="100%" fontSize="36"/>
+		<s:Button width="100%" label="Add to Shit-List!" click="addToShitList(event)"/>
+		<s:Button width="100%" label="Nah... not worth it" click="currentState='ViewList'"/>
+	</s:Group>
+	
+	
+	
+	<s:Label includeIn="DeleteEntry" width="100%" text="You sure you want to remove"/>
+	<s:Label includeIn="DeleteEntry" id="deleteName" width="100%" fontSize="32" fontWeight="bold"/>
+	<s:Label includeIn="DeleteEntry" width="100%" text="from your Shit-List?"/>
+	<s:Button includeIn="DeleteEntry" width="300" label="Yes" click="removeFromShitList()"/>
+	<s:Button includeIn="DeleteEntry" width="300" label="No Way!" click="cancelDeletion(event)"/>
+	
+	
+</s:View>
